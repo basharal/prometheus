@@ -27,6 +27,7 @@ import (
 var excludedLabels = []string{
 	labels.MetricName,
 	labels.BucketLabel,
+	labels.BucketRangeLabel,
 }
 
 type bucket struct {
@@ -42,8 +43,9 @@ func (b buckets) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b buckets) Less(i, j int) bool { return b[i].upperBound < b[j].upperBound }
 
 type metricWithBuckets struct {
-	metric  labels.Labels
-	buckets buckets
+	metric       labels.Labels
+	buckets      buckets
+	bucketRanges bucketRanges
 }
 
 // bucketQuantile calculates the quantile 'q' based on the given buckets. The

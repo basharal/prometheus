@@ -24,10 +24,11 @@ import (
 
 // Well-known label names used by Prometheus components.
 const (
-	MetricName   = "__name__"
-	AlertName    = "alertname"
-	BucketLabel  = "le"
-	InstanceName = "instance"
+	MetricName       = "__name__"
+	AlertName        = "alertname"
+	BucketLabel      = "le"
+	BucketRangeLabel = "range"
+	InstanceName     = "instance"
 
 	sep      = '\xff'
 	labelSep = '\xfe'
@@ -242,6 +243,31 @@ func (ls Labels) Get(name string) string {
 		}
 	}
 	return ""
+}
+
+// GetMulti returns the values for the labels with the given names.
+// Returns an empty string for each label that label doesn't exist. In case
+// there are multiple values for the same label, the first one is returned.
+func (ls Labels) GetMulti(names ...string) []string {
+	vals := make(map[string]string)
+	for _, name := range names {
+		vals[name] = ""
+	}
+	found := 0
+	for _, l := range ls {
+		if val, ok := vals[l.Name]; ok && val == "" {
+			found++
+			vals[l.Name] = l.Value
+			if found == len(vals) {
+				break
+			}
+		}
+	}
+	res := make([]string, len(names))
+	for i, name := range names {
+		res[i] = vals[name]
+	}
+	return res
 }
 
 // Has returns true if the label with the given name is present.

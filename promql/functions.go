@@ -605,40 +605,76 @@ func funcHistogramQuantile(vals []parser.Value, args parser.Expressions, enh *Ev
 	} else {
 		for _, v := range enh.signatureToMetricWithBuckets {
 			v.buckets = v.buckets[:0]
+			v.bucketRanges = v.bucketRanges[:0]
 		}
 	}
-	for _, el := range inVec {
-		upperBound, err := strconv.ParseFloat(
-			el.Metric.Get(model.BucketLabel), 64,
-		)
-		if err != nil {
-			// Oops, no bucket label or malformed label value. Skip.
-			// TODO(beorn7): Issue a warning somehow.
-			continue
-		}
-		l := sigf(el.Metric)
 
+	for _, el := range inVec {
+		vals := el.Metric.GetMulti(model.BucketLabel, model.BucketRangeLabel)
+		var b *bucket
+		var br *bucketRange
+		if val := vals[1]; val != "" {
+			if el.V <= 0 {
+				// Ignore 0 counts or negative (error).
+				continue
+			}
+			splitted := strings.Split(val, ",")
+			if len(splitted) != 2 {
+				// Unexpected format. Ignore.
+				continue
+			}
+			start, err := strconv.ParseFloat(strings.TrimSpace(splitted[0]), 64)
+			if err != nil {
+				// Unexpected start. Ignore.
+				continue
+			}
+			end, err := strconv.ParseFloat(strings.TrimSpace(splitted[1]), 64)
+			if err != nil {
+				// Unexpected end. Ignore.
+				continue
+			}
+			br = &bucketRange{start, end, el.V}
+		} else if val := vals[0]; val != "" {
+			upperBound, err := strconv.ParseFloat(val, 64)
+			if err != nil {
+				// Oops, no bucket label or malformed label value. Skip.
+				// TODO(beorn7): Issue a warning somehow.
+				continue
+			}
+			b = &bucket{upperBound, el.V}
+		}
+
+		l := sigf(el.Metric)
 		mb, ok := enh.signatureToMetricWithBuckets[l]
 		if !ok {
 			el.Metric = labels.NewBuilder(el.Metric).
-				Del(labels.BucketLabel, labels.MetricName).
+				Del(labels.BucketLabel, labels.MetricName, labels.BucketRangeLabel).
 				Labels()
 
-			mb = &metricWithBuckets{el.Metric, nil}
+			mb = &metricWithBuckets{el.Metric, nil, nil}
 			enh.signatureToMetricWithBuckets[l] = mb
 		}
-		mb.buckets = append(mb.buckets, bucket{upperBound, el.V})
+
+		if br != nil {
+			mb.bucketRanges = append(mb.bucketRanges, *br)
+		} else if b != nil {
+			mb.buckets = append(mb.buckets, *b)
+		}
 	}
 
 	for _, mb := range enh.signatureToMetricWithBuckets {
-		if len(mb.buckets) > 0 {
+		if len(mb.bucketRanges) > 0 {
+			enh.out = append(enh.out, Sample{
+				Metric: mb.metric,
+				Point:  Point{V: bucketRangeQuantile(q, mb.bucketRanges)},
+			})
+		} else if len(mb.buckets) > 0 {
 			enh.out = append(enh.out, Sample{
 				Metric: mb.metric,
 				Point:  Point{V: bucketQuantile(q, mb.buckets)},
 			})
 		}
 	}
-
 	return enh.out
 }
 
