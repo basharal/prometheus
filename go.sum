@@ -106,6 +106,10 @@ github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN
 github.com/aws/aws-sdk-go v1.31.9 h1:n+b34ydVfgC30j0Qm69yaapmjejQPW2BoDBX7Uy/tLI=
 github.com/aws/aws-sdk-go v1.31.9/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
+github.com/basharal/common v0.10.2 h1:ZdxnG2DLTpTkuBWurw7GRqYvJWFghcx8LeAdFGKBrCg=
+github.com/basharal/common v0.10.2/go.mod h1:uNA+UGMpEMpOMcHTz2qBmokmAlrJcOKMKoGumza6nIQ=
+github.com/basharal/common v0.10.3 h1:TnUPqmLZih4BG6LN90PXu8kIXm8N8bdsCh6Jd4b7ySU=
+github.com/basharal/common v0.10.3/go.mod h1:uNA+UGMpEMpOMcHTz2qBmokmAlrJcOKMKoGumza6nIQ=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
